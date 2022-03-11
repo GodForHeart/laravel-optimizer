@@ -1,0 +1,33 @@
+{
+    "name": "godforheart/laravel-optimizer",
+    "description": "性能分析平台 for Laravel",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "php",
+        "optimizer"
+    ],
+    "authors": [
+        {
+            "name": "GodForHeart",
+            "email": "godforheart@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/support": "^6.0|^7.0|^8.0|^9.0",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Godforheart\\LaravelOptimizer\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Godforheart\\LaravelOptimizer\\OptimizerServiceProvider"
+            ]
+        }
+    }
+}
