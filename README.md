@@ -21,6 +21,25 @@ composer require godforheart/laravel-optimizer
 php artisan optimizer:publish
 ```
 
+## 使用方式（app/Http/Kernel.php 中增加【OptimizerLog】中间件）
+```php
+<?php
+
+namespace App\Http;
+
+use Godforheart\LaravelOptimizer\Middleware\OptimizerLog;
+...
+
+class Kernel extends HttpKernel
+{
+    protected $middleware = [
+        ...
+        OptimizerLog::class
+    ];
+}
+
+```
+
 
 ## 贡献
 
