@@ -6,15 +6,15 @@ use Godforheart\LaravelOptimizer\Contracts\Factory;
 use Godforheart\LaravelOptimizer\Kernel\Storage\Database;
 use Godforheart\LaravelOptimizer\Kernel\Storage\Logger;
 use Godforheart\LaravelOptimizer\Kernel\Storage\Platform;
-use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
 class StorageManage implements Factory
 {
     /**
-     * @var Application
+     * @var array
      */
-    private $app;
+    private $config;
 
     /**
      * @var array
@@ -29,18 +29,18 @@ class StorageManage implements Factory
     /**
      * Create a new Log manager instance.
      *
-     * @param Application $app
+     * @param array $config
      * @return void
      */
-    public function __construct($app)
+    public function __construct(array $config)
     {
-        $this->app = $app;
+        $this->config = $config;
     }
 
     public function driver($name = null)
     {
         if ($name == null) {
-            $name = $this->app['config']->get('optimizer.default');
+            $name = Arr::get($this->config, 'default');
         }
 
         return $this->resolve($name);
@@ -69,7 +69,7 @@ class StorageManage implements Factory
 
     public function configurationFor($name)
     {
-        return $this->app['config']->get("optimizer.storage.$name", '');
+        return Arr::get($this->config, "storage.$name", '');
     }
 
     /**
@@ -80,7 +80,7 @@ class StorageManage implements Factory
      */
     protected function callCustomCreator(array $config)
     {
-        return $this->customStorage[$config['driver']]($this->app, $config);
+        return $this->customStorage[$config['driver']]($config);
     }
 
     protected function createLoggerDriver(): Logger
@@ -90,11 +90,11 @@ class StorageManage implements Factory
 
     protected function createPlatformDriver(): Platform
     {
-        return (new Platform())->setConfig($this->configurationFor($this->app['config']->get('optimizer.default')));
+        return (new Platform())->setConfig($this->configurationFor(Arr::get($this->config, 'default')));
     }
 
     protected function createDatabaseDriver(): Database
     {
-        return (new Database())->setConfig($this->configurationFor($this->app['config']->get('optimizer.default')));
+        return (new Database())->setConfig($this->configurationFor(Arr::get($this->config, 'default')));
     }
 }

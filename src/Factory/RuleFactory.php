@@ -11,18 +11,18 @@ use InvalidArgumentException;
 class RuleFactory
 {
     /**
-     * @var Application
+     * @var array
      */
-    private $app;
+    private $config;
 
     /**
      * @var Cache
      */
     protected $cache;
 
-    public function __construct(Application $app, Cache $cache)
+    public function __construct(array $config, Cache $cache)
     {
-        $this->app = $app;
+        $this->config = $config;
         $this->cache = $cache;
     }
 

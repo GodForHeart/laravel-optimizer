@@ -11,13 +11,13 @@ use InvalidArgumentException;
 class StrategyFactory
 {
     /**
-     * @var Application
+     * @var array
      */
-    private $app;
+    private $config;
 
-    public function __construct(Application $app)
+    public function __construct(array $config)
     {
-        $this->app = $app;
+        $this->config = $config;
     }
 
     public function createStrategy($strategy)

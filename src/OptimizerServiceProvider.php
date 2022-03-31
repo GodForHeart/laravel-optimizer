@@ -33,15 +33,15 @@ class OptimizerServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton('optimizer.storage', function ($app) {
-            return new StorageManage($app);
+            return new StorageManage($app['config']->get('optimizer'));
         });
 
         $this->app->singleton('optimizer.strategy', function ($app) {
-            return (new StrategyFactory($app))->createStrategy($app['config']->get('optimizer.limiter.strategy'));
+            return (new StrategyFactory($app['config']->get('optimizer')))->createStrategy($app['config']->get('optimizer.limiter.strategy'));
         });
 
         $this->app->singleton('optimizer.rule', function ($app) {
-            return (new RuleFactory($app, $app->make('cache')->driver()))->createRule(
+            return (new RuleFactory($app['config']->get('optimizer'), $app->make('cache')->driver()))->createRule(
                 $app['config']->get('optimizer.limiter.rule'),
                 $app['config']->get('optimizer.limiter.rate')
             );
@@ -49,7 +49,7 @@ class OptimizerServiceProvider extends ServiceProvider
 
         $this->app->singleton(OptimizerLimiter::class, function ($app) {
             return new OptimizerLimiter(
-                $app,
+                $app['config']->get('optimizer'),
                 $app->make('optimizer.storage')->driver(),
                 $app->make('optimizer.strategy'),
                 $app->make('optimizer.rule')
