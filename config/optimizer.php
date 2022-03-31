@@ -40,6 +40,7 @@ return [
         'platform' => [
             'driver' => 'platform',
             'platform_id' => env('OPTIMIZER_PLATFORM_ID', ''),
+            'platform_secret' => env('OPTIMIZER_PLATFORM_SECRET', ''),
             'project_id' => env('OPTIMIZER_PROJECT_ID', ''),
             //  当前只支持【MD5】，请勿修改
             'sign_type' => env('OPTIMIZER_SIGN_TYPE', 'MD5'),
