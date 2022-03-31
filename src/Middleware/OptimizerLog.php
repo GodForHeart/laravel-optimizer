@@ -34,7 +34,13 @@ class OptimizerLog
             return $next($request);
         }
 
-        $startTime = microtime(true);
+        $businessStartTime = microtime(true);
+
+        if (!defined('LARAVEL_START')) {
+            $apiStartTime = microtime(true);
+        } else {
+            $apiStartTime = LARAVEL_START;
+        }
 
         $requestParams = $responseContent = [];
 
@@ -50,10 +56,13 @@ class OptimizerLog
             $responseContent = $response->getOriginalContent();
         }
 
+        $endTime = microtime(true);
+
         $this->optimizerLimiter->persist([
             'api_uri' => $request->path(),
             'request_method' => $request->method(),
-            'time' => microtime(true) - $startTime,
+            'time' => $endTime - $apiStartTime,
+            'business_time' => $endTime - $businessStartTime,
             'request_params' => $requestParams,
             'response_content' => $responseContent,
             "logs" => $this->logs
