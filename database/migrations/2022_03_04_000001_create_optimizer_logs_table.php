@@ -18,7 +18,8 @@ class CreateOptimizerLogsTable extends Migration
             $table->string('request_id')->comment('唯一请求id');
             $table->string('api_uri')->comment('接口路径');
             $table->string('method', 50)->comment('请求方式');
-            $table->unsignedInteger('millisecond')->comment('执行时间（毫秒）');
+            $table->decimal('millisecond', 12)->comment('执行时间（毫秒）');
+            $table->decimal('business_millisecond', 12)->comment('业务执行时间（毫秒）');
             $table->json('execution_sql')->comment('执行sql');
             $table->unsignedInteger('sql_count')->comment('sql执行次数');
             $table->json('request_params')->comment('请求参数');

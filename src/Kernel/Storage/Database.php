@@ -15,6 +15,7 @@ class Database extends StorageAbstract implements Storage
                 'api_uri' => $log['api_uri'] ?? '',
                 'method' => $log['request_method'] ?? '',
                 'millisecond' => ($log['time'] ?? 0) * 1000,
+                'business_millisecond' => ($log['business_time'] ?? 0) * 1000,
                 'execution_sql' => json_encode($log['logs'] ?? []),
                 'sql_count' => count($log['logs'] ?? []),
                 'request_params' => json_encode($log['request_params'] ?? []),
