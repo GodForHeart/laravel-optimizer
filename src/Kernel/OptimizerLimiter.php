@@ -5,6 +5,7 @@ namespace Godforheart\LaravelOptimizer\Kernel;
 use Godforheart\LaravelOptimizer\Contracts\Rule;
 use Godforheart\LaravelOptimizer\Contracts\Storage;
 use Godforheart\LaravelOptimizer\Contracts\Strategy;
+use Godforheart\LaravelOptimizer\Kernel\Storage\Logger;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -91,5 +92,10 @@ class OptimizerLimiter
     public function isSafeMode(): bool
     {
         return (bool)Arr::get($this->config, 'safe_mode');
+    }
+
+    public function persistSingleSql(array $singleSql)
+    {
+        $this->storage->persistSingleSql($singleSql);
     }
 }

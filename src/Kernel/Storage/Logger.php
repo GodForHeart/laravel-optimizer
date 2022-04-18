@@ -10,4 +10,9 @@ class Logger extends StorageAbstract implements Storage
     {
         app('log')->info('optimizer', $log);
     }
+
+    public function persistSingleSql(array $singleSql)
+    {
+        app('log')->info('optimizer:singleSql', $singleSql);
+    }
 }

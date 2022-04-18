@@ -87,6 +87,8 @@ class OptimizerLog
             }
 
             $this->logs[] = $newLog;
+
+            $this->optimizerLimiter->persistSingleSql($newLog);
         });
     }
 }

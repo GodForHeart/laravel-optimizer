@@ -31,6 +31,7 @@ return [
         'logger' => [
             'driver' => 'logger',
             'channels' => env('LOG_CHANNEL', 'stack'),
+            'single_sql' => (bool)env('LOG_SINGLE_SQL', false),
         ],
         'database' => [
             'driver' => 'database',

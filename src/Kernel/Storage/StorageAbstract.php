@@ -15,4 +15,9 @@ abstract class StorageAbstract
         $this->config = $config;
         return $this;
     }
+
+    public function persistSingleSql(array $singleSql)
+    {
+
+    }
 }
