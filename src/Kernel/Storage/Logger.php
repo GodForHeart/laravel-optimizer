@@ -12,10 +12,10 @@ class Logger extends StorageAbstract implements Storage
         app('log')->info('optimizer', $log);
     }
 
-    public function persistSingleSql(array $singleSql)
+    public function persistSingleSql(string $singleSql)
     {
         if (Arr::get($this->config, 'single_sql') === true) {
-            app('log')->info('optimizer:singleSql', $singleSql);
+            app('log')->info('optimizer:singleSql:' . $singleSql);
         }
     }
 }

@@ -96,6 +96,11 @@ class OptimizerLimiter
 
     public function persistSingleSql(array $singleSql)
     {
-        $this->storage->persistSingleSql($singleSql);
+        $tmp = str_replace('%', '%%', Arr::get($singleSql, 'sql', ''));
+        $tmp = str_replace('?', '"' . '%s' . '"', $tmp);
+        $tmp = vsprintf($tmp, Arr::get($singleSql, 'bindings', []));
+        $tmp = str_replace("\\", "", $tmp);
+        $this->storage->persistSingleSql(
+            '[connection:' . Arr::get($singleSql, 'connection', '') . '] execution times: ' . Arr::get($singleSql, 'time', 0) * 1000 . 'ms; ' . $tmp . "\n\t");
     }
 }

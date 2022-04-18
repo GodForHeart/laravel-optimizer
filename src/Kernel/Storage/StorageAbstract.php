@@ -16,7 +16,7 @@ abstract class StorageAbstract
         return $this;
     }
 
-    public function persistSingleSql(array $singleSql)
+    public function persistSingleSql(string $singleSql)
     {
 
     }
