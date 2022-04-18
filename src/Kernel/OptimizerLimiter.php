@@ -96,11 +96,28 @@ class OptimizerLimiter
 
     public function persistSingleSql(array $singleSql)
     {
-        $tmp = str_replace('%', '%%', Arr::get($singleSql, 'sql', ''));
-        $tmp = str_replace('?', '"' . '%s' . '"', $tmp);
-        $tmp = vsprintf($tmp, Arr::get($singleSql, 'bindings', []));
+        [$sql, $bindings, $connection, $time] = [
+            Arr::get($singleSql, 'sql', ''),
+            Arr::get($singleSql, 'bindings', []),
+            Arr::get($singleSql, 'connection', ''),
+            Arr::get($singleSql, 'time', 0)
+        ];
+
+        $tmp = $sql;
+        $tmp = str_replace('?', '%s', $tmp);
+        $tmp = vsprintf(
+            $tmp,
+            collect($bindings)->map(function ($item) {
+                if (is_string($item)) {
+                    return '"' . $item . '"';
+                } elseif (is_bool($item)) {
+                    return (int)$item;
+                }
+                return $item;
+            })->toArray()
+        );
         $tmp = str_replace("\\", "", $tmp);
         $this->storage->persistSingleSql(
-            '[connection:' . Arr::get($singleSql, 'connection', '') . '] execution times: ' . Arr::get($singleSql, 'time', 0) * 1000 . 'ms; ' . $tmp . "\n\t");
+            '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t");
     }
 }
