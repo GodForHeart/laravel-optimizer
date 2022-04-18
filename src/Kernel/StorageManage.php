@@ -85,7 +85,7 @@ class StorageManage implements Factory
 
     protected function createLoggerDriver(): Logger
     {
-        return new Logger();
+        return (new Logger())->setConfig($this->configurationFor(Arr::get($this->config, 'default')));
     }
 
     protected function createPlatformDriver(): Platform

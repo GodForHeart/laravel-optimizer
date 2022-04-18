@@ -3,6 +3,7 @@
 namespace Godforheart\LaravelOptimizer\Kernel\Storage;
 
 use Godforheart\LaravelOptimizer\Contracts\Storage;
+use Illuminate\Support\Arr;
 
 class Logger extends StorageAbstract implements Storage
 {
@@ -13,6 +14,8 @@ class Logger extends StorageAbstract implements Storage
 
     public function persistSingleSql(array $singleSql)
     {
-        app('log')->info('optimizer:singleSql', $singleSql);
+        if (Arr::get($this->config, 'single_sql') === true) {
+            app('log')->info('optimizer:singleSql', $singleSql);
+        }
     }
 }
