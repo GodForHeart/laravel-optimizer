@@ -112,6 +112,8 @@ class OptimizerLimiter
                     return '"' . $item . '"';
                 } elseif (is_bool($item)) {
                     return (int)$item;
+                } elseif ($item instanceof \DateTime) {
+                    return $item->format('Y-m-d H:i:s');
                 }
                 return $item;
             })->toArray()
