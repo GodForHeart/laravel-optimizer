@@ -1,9 +1,14 @@
 <?php
 return [
-    //  是否开启
+    //  是否开启扩展
     'enable' => (bool)env('OPTIMIZER_ENABLE', true),
 
-    //  默认日志存储类型
+    /**
+     * 默认日志存储类型，默认日志文件，可选：
+     *          logger：本地日志
+     *          database：数据库
+     *          platform：日志分析平台
+     */
     'default' => env('OPTIMIZER_DEFAULT', 'logger'),
 
     //  是否安全模式，安全模式下，不会记录请求参数和响应内容，以及只记录MD5(sql)
@@ -30,12 +35,16 @@ return [
         //  全量日志
         'logger' => [
             'driver' => 'logger',
-            'channels' => env('LOG_CHANNEL', 'stack'),
-            'single_sql' => (bool)env('LOG_SINGLE_SQL', false),
+            //  日志类型
+            'channels' => env('OPTIMIZER_LOG_CHANNEL', env('LOG_CHANNEL', 'stack')),
+            //  是否开启单条sql日志，默认开启
+            'single_sql' => (bool)env('LOG_SINGLE_SQL', true),
         ],
+        //  数据库日志模式
         'database' => [
             'driver' => 'database',
             'channels' => env('DB_CONNECTION', 'mysql'),
+            //  默认表名，如更改迁移文件表名，请对应更改
             'table' => 'optimizer_logs'
         ],
         'platform' => [
@@ -68,6 +77,6 @@ return [
         /**
          * rate(占比)：一百次中记录多少次，1-100
          */
-        'rate' => (int)env('OPTIMIZER_LIMITER_RATE', 50),
+        'rate' => (int)env('OPTIMIZER_LIMITER_RATE', 100),
     ]
 ];

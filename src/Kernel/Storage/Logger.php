@@ -9,13 +9,13 @@ class Logger extends StorageAbstract implements Storage
 {
     public function persist(array $log)
     {
-        app('log')->info('optimizer', $log);
+        app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer', $log);
     }
 
     public function persistSingleSql(string $singleSql)
     {
         if (Arr::get($this->config, 'single_sql') === true) {
-            app('log')->info('optimizer:singleSql:' . $singleSql);
+            app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer:singleSql:' . $singleSql);
         }
     }
 }
