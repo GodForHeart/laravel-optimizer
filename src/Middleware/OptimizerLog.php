@@ -53,7 +53,7 @@ class OptimizerLog
         $response = $next($request);
 
         if (!$this->optimizerLimiter->isSafeMode() && $response instanceof JsonResponse) {
-            $responseContent = $response->getOriginalContent();
+            $responseContent = $response->getContent();
         }
 
         $endTime = microtime(true);
