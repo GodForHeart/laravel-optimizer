@@ -104,6 +104,7 @@ class OptimizerLimiter
         ];
 
         $tmp = $sql;
+        $tmp = str_replace('%', '%%', $tmp);
         $tmp = str_replace('?', '%s', $tmp);
         $tmp = vsprintf(
             $tmp,
