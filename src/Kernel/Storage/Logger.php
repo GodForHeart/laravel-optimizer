@@ -9,7 +9,7 @@ class Logger extends StorageAbstract implements Storage
 {
     public function persist(array $log)
     {
-        app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer', $log);
+        app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer ' . json_encode($log) . "\n\t");
     }
 
     public function persistSingleSql(string $singleSql)
