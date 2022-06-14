@@ -25,6 +25,14 @@ return [
         'password',
     ],
 
+    //  额外日志参数
+    'additional_request_params' => [
+        //  示例：日志增加记录访问用户id
+//        'user_id' => function () {
+//            return app(\Illuminate\Http\Request::class)->user()?->id;
+//        }
+    ],
+
     /*
      * storage(存储)：可自定义driver
      *          logger：本地日志

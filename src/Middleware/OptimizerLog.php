@@ -58,7 +58,7 @@ class OptimizerLog
 
         $endTime = microtime(true);
 
-        $this->optimizerLimiter->persist([
+        $log = [
             'api_uri' => $request->path(),
             'request_method' => $request->method(),
             'time' => $endTime - $apiStartTime,
@@ -66,7 +66,19 @@ class OptimizerLog
             'request_params' => $requestParams,
             'response_content' => $responseContent,
             "logs" => $this->logs
-        ]);
+        ];
+
+        if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
+            foreach ($additionalRequestParams as $key => $value) {
+                if ($value instanceof Closure) {
+                    $log[$key] = call_user_func($value);
+                } else {
+                    $log[$key] = $value;
+                }
+            }
+        }
+
+        $this->optimizerLimiter->persist($log);
 
         return $response;
     }
