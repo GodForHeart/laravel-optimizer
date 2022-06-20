@@ -5,6 +5,7 @@ namespace Godforheart\LaravelOptimizer\Kernel;
 use Godforheart\LaravelOptimizer\Contracts\Rule;
 use Godforheart\LaravelOptimizer\Contracts\Storage;
 use Godforheart\LaravelOptimizer\Contracts\Strategy;
+use Godforheart\LaravelOptimizer\Jobs\OptimizerPersistJob;
 use Godforheart\LaravelOptimizer\Kernel\Storage\Logger;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
@@ -86,7 +87,19 @@ class OptimizerLimiter
             $log['response_content'] = [];
         }
 
-        $this->storage->persist($log);
+        if (Arr::get($this->config, 'persist_way') == 'sync') {
+            dispatch_sync(new OptimizerPersistJob(
+                $this->storage,
+                'persist',
+                $log
+            ));
+        } else {
+            dispatch(new OptimizerPersistJob(
+                $this->storage,
+                'persist',
+                $log
+            ));
+        }
     }
 
     public function isSafeMode(): bool
@@ -120,7 +133,20 @@ class OptimizerLimiter
             })->toArray()
         );
         $tmp = str_replace("\\", "", $tmp);
-        $this->storage->persistSingleSql(
-            '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t");
+
+
+        if (Arr::get($this->config, 'persist_way') == 'sync') {
+            dispatch_sync(new OptimizerPersistJob(
+                $this->storage,
+                'persistSingleSql',
+                '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
+            ));
+        } else {
+            dispatch(new OptimizerPersistJob(
+                $this->storage,
+                'persistSingleSql',
+                '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
+            ));
+        }
     }
 }

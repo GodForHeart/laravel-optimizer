@@ -20,6 +20,9 @@ return [
     //  最大响应内容记录长度（超过不记录），平台方日志最大值为【32768】，请根据实际情况处理
     'max_response_length' => (int)env('OPTIMIZER_MAX_RESPONSE_LENGTH', 32768),
 
+    //  持久化方式，【sync：同步持久化】，【queue：使用队列（具体队列执行方式根据queue）】
+    'persist_way' => env('OPTIMIZER_PERSIST_WAY', 'sync'),
+
     //  忽略的请求key，防止隐私字段：如【password】字段加入到日志中
     'except_request_key' => [
         'password',
