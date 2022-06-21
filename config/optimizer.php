@@ -26,6 +26,11 @@ return [
     //  持久化方式，【sync：同步持久化】，【queue：使用队列（具体队列执行方式根据queue）】
     'persist_way' => env('OPTIMIZER_PERSIST_WAY', 'sync'),
 
+    //  忽略的接口地址
+    'ignore_uri' => [
+//        '/auth/login'
+    ],
+
     //  忽略的请求key，防止隐私字段：如【password】字段加入到日志中
     'except_request_key' => [
         'password',

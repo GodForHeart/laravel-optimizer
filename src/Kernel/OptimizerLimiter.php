@@ -57,6 +57,9 @@ class OptimizerLimiter
         if (!Arr::get($this->config, 'enable')) {
             return false;
         }
+        if (in_array($request->getRequestUri(), (array)Arr::get($this->config, 'ignore_uri'))) {
+            return false;
+        }
 
         $rate = intval(Arr::get($this->config, 'limiter.rate'));
         if ($rate <= 0 || $rate > 100) {
