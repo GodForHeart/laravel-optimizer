@@ -31,30 +31,30 @@ class OptimizerLog
      */
     public function handle(Request $request, Closure $next)
     {
+        $this->logs = [];
+        if (!$this->optimizerLimiter->allowStorage($request)) {
+            return $next($request);
+        }
+
+        $businessStartTime = microtime(true);
+
+        if (!defined('LARAVEL_START')) {
+            $apiStartTime = microtime(true);
+        } else {
+            $apiStartTime = LARAVEL_START;
+        }
+
+        $requestParams = $responseContent = [];
+
+        if (!$this->optimizerLimiter->isSafeMode()) {
+            $requestParams = $request->except((array)config()->get('optimizer.except_request_key'));
+        }
+
+        $this->listenSql();
+
+        $response = $next($request);
+
         try {
-            $this->logs = [];
-            if (!$this->optimizerLimiter->allowStorage($request)) {
-                return $next($request);
-            }
-
-            $businessStartTime = microtime(true);
-
-            if (!defined('LARAVEL_START')) {
-                $apiStartTime = microtime(true);
-            } else {
-                $apiStartTime = LARAVEL_START;
-            }
-
-            $requestParams = $responseContent = [];
-
-            if (!$this->optimizerLimiter->isSafeMode()) {
-                $requestParams = $request->except((array)config()->get('optimizer.except_request_key'));
-            }
-
-            $this->listenSql();
-
-            $response = $next($request);
-
             if (!$this->optimizerLimiter->isSafeMode() && $response instanceof JsonResponse) {
                 $responseContent = $response->getContent();
             }
