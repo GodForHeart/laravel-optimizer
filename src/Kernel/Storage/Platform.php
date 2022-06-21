@@ -26,13 +26,17 @@ class Platform extends StorageAbstract implements Storage
         unset($log['platform_secret']);
 
         $client = new Client([
+            'connect_timeout' => $this->config['timeout'] ?? 1,
             'timeout' => $this->config['timeout'] ?? 1,
             'allow_redirects' => false,
+            'headers' => [
+                'Content-Type' => 'application/json'
+            ]
         ]);
         $client->post(
             "https://gateway.optimizer.juli-jianzhan.com",
             [
-                'form_params' => $log,
+                'body' => $log,
             ]
         );
     }

@@ -8,6 +8,8 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class OptimizerLog
 {
@@ -29,58 +31,62 @@ class OptimizerLog
      */
     public function handle(Request $request, Closure $next)
     {
-        $this->logs = [];
-        if (!$this->optimizerLimiter->allowStorage($request)) {
-            return $next($request);
-        }
+        try {
+            $this->logs = [];
+            if (!$this->optimizerLimiter->allowStorage($request)) {
+                return $next($request);
+            }
 
-        $businessStartTime = microtime(true);
+            $businessStartTime = microtime(true);
 
-        if (!defined('LARAVEL_START')) {
-            $apiStartTime = microtime(true);
-        } else {
-            $apiStartTime = LARAVEL_START;
-        }
+            if (!defined('LARAVEL_START')) {
+                $apiStartTime = microtime(true);
+            } else {
+                $apiStartTime = LARAVEL_START;
+            }
 
-        $requestParams = $responseContent = [];
+            $requestParams = $responseContent = [];
 
-        if (!$this->optimizerLimiter->isSafeMode()) {
-            $requestParams = $request->except((array)config()->get('optimizer.except_request_key'));
-        }
+            if (!$this->optimizerLimiter->isSafeMode()) {
+                $requestParams = $request->except((array)config()->get('optimizer.except_request_key'));
+            }
 
-        $this->listenSql();
+            $this->listenSql();
 
-        $response = $next($request);
+            $response = $next($request);
 
-        if (!$this->optimizerLimiter->isSafeMode() && $response instanceof JsonResponse) {
-            $responseContent = $response->getContent();
-        }
+            if (!$this->optimizerLimiter->isSafeMode() && $response instanceof JsonResponse) {
+                $responseContent = $response->getContent();
+            }
 
-        $endTime = microtime(true);
+            $endTime = microtime(true);
 
-        $log = [
-            'api_uri' => $request->path(),
-            'request_method' => $request->method(),
-            'time' => $endTime - $apiStartTime,
-            'business_time' => $endTime - $businessStartTime,
-            'request_params' => $requestParams,
-            'response_content' => $responseContent,
-            "logs" => $this->logs
-        ];
+            $log = [
+                'api_uri' => $request->path(),
+                'request_method' => $request->method(),
+                'time' => $endTime - $apiStartTime,
+                'business_time' => $endTime - $businessStartTime,
+                'request_params' => $requestParams,
+                'response_content' => $responseContent,
+                "logs" => $this->logs
+            ];
 
-        if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
-            foreach ($additionalRequestParams as $key => $value) {
-                if ($value instanceof Closure) {
-                    $log[$key] = call_user_func($value);
-                } else {
-                    $log[$key] = $value;
+            if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
+                foreach ($additionalRequestParams as $key => $value) {
+                    if ($value instanceof Closure) {
+                        $log[$key] = call_user_func($value);
+                    } else {
+                        $log[$key] = $value;
+                    }
                 }
             }
+
+            $this->optimizerLimiter->persist($log);
+        } catch (Throwable $throwable) {
+            Log::error($throwable);
+        } finally {
+            return $response;
         }
-
-        $this->optimizerLimiter->persist($log);
-
-        return $response;
     }
 
     public function listenSql()
