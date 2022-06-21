@@ -9,6 +9,8 @@ class Database extends StorageAbstract implements Storage
 {
     public function persist(array $log)
     {
+        $responseContent = $log['response_content'] ?? [];
+
         DB::connection($this->config['channels'])->table($this->config['table'])
             ->insert([
                 'request_id' => $log['request_id'] ?? '',
@@ -20,8 +22,8 @@ class Database extends StorageAbstract implements Storage
                 'sql_count' => count($log['logs'] ?? []),
                 'request_params' => json_encode($log['request_params'] ?? []),
                 'request_params_length' => mb_strlen(json_encode($log['request_params'] ?? [])),
-                'response_content' => json_encode($log['response_content'] ?? []),
-                'response_content_length' => mb_strlen(json_encode($log['response_content'] ?? [])),
+                'response_content' => is_string($responseContent) ? $responseContent : json_encode($responseContent),
+                'response_content_length' => is_string($responseContent) ? mb_strlen($responseContent) : mb_strlen(json_encode($responseContent)),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
