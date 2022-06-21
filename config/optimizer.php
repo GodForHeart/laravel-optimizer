@@ -3,6 +3,9 @@ return [
     //  是否开启扩展
     'enable' => (bool)env('OPTIMIZER_ENABLE', true),
 
+    //  是否开启平台日志（可 本地日志+平台日志 双线）
+    'enable_platform_log' => (bool)env('OPTIMIZER_ENABLE_PLATFORM_LOG', false),
+
     /**
      * 默认日志存储类型，默认日志文件，可选：
      *          logger：本地日志

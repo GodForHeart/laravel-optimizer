@@ -6,7 +6,7 @@ use Godforheart\LaravelOptimizer\Contracts\Rule;
 use Godforheart\LaravelOptimizer\Contracts\Storage;
 use Godforheart\LaravelOptimizer\Contracts\Strategy;
 use Godforheart\LaravelOptimizer\Jobs\OptimizerPersistJob;
-use Godforheart\LaravelOptimizer\Kernel\Storage\Logger;
+use Godforheart\LaravelOptimizer\Kernel\Storage\Platform;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -88,17 +88,17 @@ class OptimizerLimiter
         }
 
         if (Arr::get($this->config, 'persist_way') == 'sync') {
-            dispatch_sync(new OptimizerPersistJob(
-                $this->storage,
-                'persist',
-                $log
-            ));
+            dispatch_sync(new OptimizerPersistJob($this->storage, 'persist', $log));
         } else {
-            dispatch(new OptimizerPersistJob(
-                $this->storage,
-                'persist',
-                $log
-            ));
+            dispatch(new OptimizerPersistJob($this->storage, 'persist', $log));
+        }
+
+        if (!($this->storage instanceof Platform) && Arr::get($this->config, 'enable_platform_log') == true) {
+            if (Arr::get($this->config, 'persist_way') == 'sync') {
+                dispatch_sync(new OptimizerPersistJob(new StorageManage($this->config), 'persist', $log));
+            } else {
+                dispatch(new OptimizerPersistJob(new StorageManage($this->config), 'persist', $log));
+            }
         }
     }
 
@@ -134,19 +134,16 @@ class OptimizerLimiter
         );
         $tmp = str_replace("\\", "", $tmp);
 
+        $job = new OptimizerPersistJob(
+            $this->storage,
+            'persistSingleSql',
+            '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
+        );
 
         if (Arr::get($this->config, 'persist_way') == 'sync') {
-            dispatch_sync(new OptimizerPersistJob(
-                $this->storage,
-                'persistSingleSql',
-                '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
-            ));
+            dispatch_sync($job);
         } else {
-            dispatch(new OptimizerPersistJob(
-                $this->storage,
-                'persistSingleSql',
-                '[connection:' . $connection . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
-            ));
+            dispatch($job);
         }
     }
 }
