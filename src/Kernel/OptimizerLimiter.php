@@ -98,9 +98,9 @@ class OptimizerLimiter
 
         if (!($this->storage instanceof Platform) && Arr::get($this->config, 'enable_platform_log') == true) {
             if (Arr::get($this->config, 'persist_way') == 'sync') {
-                dispatch_sync(new OptimizerPersistJob(new StorageManage($this->config), 'persist', $log));
+                dispatch_sync(new OptimizerPersistJob((new StorageManage($this->config))->driver(), 'persist', $log));
             } else {
-                dispatch(new OptimizerPersistJob(new StorageManage($this->config), 'persist', $log));
+                dispatch(new OptimizerPersistJob((new StorageManage($this->config))->driver(), 'persist', $log));
             }
         }
     }

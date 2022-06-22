@@ -36,7 +36,7 @@ class Platform extends StorageAbstract implements Storage
         $client->post(
             "https://gateway.optimizer.juli-jianzhan.com",
             [
-                'body' => $log,
+                'json' => $log,
             ]
         );
     }
