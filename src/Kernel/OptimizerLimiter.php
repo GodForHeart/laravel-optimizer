@@ -97,10 +97,12 @@ class OptimizerLimiter
         }
 
         if (!($this->storage instanceof Platform) && Arr::get($this->config, 'enable_platform_log') == true) {
+            $platformConfig = array_merge($this->config, ['default' => 'platform']);
+
             if (Arr::get($this->config, 'persist_way') == 'sync') {
-                dispatch_sync(new OptimizerPersistJob((new StorageManage($this->config))->driver(), 'persist', $log));
+                dispatch_sync(new OptimizerPersistJob((new StorageManage($platformConfig))->driver(), 'persist', $log));
             } else {
-                dispatch(new OptimizerPersistJob((new StorageManage($this->config))->driver(), 'persist', $log));
+                dispatch(new OptimizerPersistJob((new StorageManage($platformConfig))->driver(), 'persist', $log));
             }
         }
     }
