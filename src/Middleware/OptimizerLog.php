@@ -7,6 +7,7 @@ use Godforheart\LaravelOptimizer\Kernel\OptimizerLimiter;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -49,6 +50,10 @@ class OptimizerLog
         if (!$this->optimizerLimiter->isSafeMode()) {
             $requestParams = $request->except((array)config()->get('optimizer.except_request_key'));
         }
+
+        array_map(function ($removeKey) use (&$requestParams) {
+            Arr::set($requestParams, $removeKey, 'This is a file');
+        }, array_keys(Arr::dot($request->allFiles())));
 
         $this->listenSql();
 
