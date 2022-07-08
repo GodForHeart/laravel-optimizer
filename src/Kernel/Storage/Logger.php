@@ -20,4 +20,11 @@ class Logger extends StorageAbstract implements Storage
             app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer:singleSql:' . $singleSql);
         }
     }
+
+    public function persistSingleRedis(string $singleRedis)
+    {
+        if (Arr::get($this->config, 'single_redis') === true) {
+            app('log')->channel(Arr::get($this->config, 'channels'))->info('optimizer:singleRedis:' . $singleRedis);
+        }
+    }
 }

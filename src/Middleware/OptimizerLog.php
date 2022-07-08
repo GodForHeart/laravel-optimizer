@@ -4,10 +4,12 @@ namespace Godforheart\LaravelOptimizer\Middleware;
 
 use Closure;
 use Godforheart\LaravelOptimizer\Kernel\OptimizerLimiter;
+use Godforheart\LaravelOptimizer\OptimizerRedisServiceProvider;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Redis\Events\CommandExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -19,6 +21,7 @@ class OptimizerLog
      */
     private $optimizerLimiter;
     private $logs;
+    private $redisLogs;
 
     public function __construct(OptimizerLimiter $optimizerLimiter)
     {
@@ -33,6 +36,7 @@ class OptimizerLog
     public function handle(Request $request, Closure $next)
     {
         $this->logs = [];
+        $this->redisLogs = [];
         if (!$this->optimizerLimiter->allowStorage($request)) {
             return $next($request);
         }
@@ -56,6 +60,7 @@ class OptimizerLog
         }, array_keys(Arr::dot($request->allFiles())));
 
         $this->listenSql();
+        $this->listenRedis();
 
         $response = $next($request);
 
@@ -73,7 +78,8 @@ class OptimizerLog
                 'business_time' => $endTime - $businessStartTime,
                 'request_params' => $requestParams,
                 'response_content' => $responseContent,
-                "logs" => $this->logs
+                "logs" => $this->logs,
+                "redis_logs" => $this->redisLogs,
             ];
 
             if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
@@ -113,5 +119,25 @@ class OptimizerLog
 
             $this->optimizerLimiter->persistSingleSql($newLog);
         });
+    }
+
+    public function listenRedis()
+    {
+        if (in_array(OptimizerRedisServiceProvider::class, config('app.providers'))) {
+            $callback = function (CommandExecuted $commandExecuted) {
+                $newRedisLog = [
+                    'time' => bcdiv($commandExecuted->time, 1000, 5),
+                    'command' => $commandExecuted->command,
+                    'parameters' => $commandExecuted->parameters,
+                    'connection_name' => $commandExecuted->connectionName,
+                ];
+                $this->redisLogs[] = $newRedisLog;
+
+                $this->optimizerLimiter->persistSingleRedisCommand($newRedisLog);
+            };
+
+            app('redis')->connection()->listen($callback);
+            app('redis')->connection('cache')->listen($callback);
+        }
     }
 }

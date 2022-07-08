@@ -58,6 +58,8 @@ return [
             'channels' => env('OPTIMIZER_LOG_CHANNEL', env('LOG_CHANNEL', 'stack')),
             //  是否开启单条sql日志，默认开启
             'single_sql' => (bool)env('LOG_SINGLE_SQL', true),
+            //  是否开启单条redis日志，默认关闭
+            'single_redis' => (bool)env('LOG_SINGLE_REDIS', false),
         ],
         //  数据库日志模式
         'database' => [

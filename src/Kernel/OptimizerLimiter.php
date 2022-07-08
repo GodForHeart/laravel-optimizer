@@ -151,4 +151,42 @@ class OptimizerLimiter
             dispatch($job);
         }
     }
+
+    public function persistSingleRedisCommand(array $singleSql)
+    {
+        [$time, $command, $parameters, $connectionName] = [
+            Arr::get($singleSql, 'time', 0),
+            Arr::get($singleSql, 'command', ''),
+            Arr::get($singleSql, 'parameters', []),
+            Arr::get($singleSql, 'connection_name', ''),
+        ];
+
+        $tmp = $command . ' ' . collect($parameters)->map(function ($item) {
+                if (is_string($item)) {
+                    return '"' . $item . '"';
+                } elseif (is_bool($item)) {
+                    return (int)$item;
+                } elseif ($item instanceof \DateTime) {
+                    return $item->format('Y-m-d H:i:s');
+                }
+                return $this->serialize($item);
+            })->implode(' ');
+
+        $job = new OptimizerPersistJob(
+            $this->storage,
+            'persistSingleRedis',
+            '[connection:' . $connectionName . '] execution times: ' . $time * 1000 . 'ms; ' . $tmp . "\n\t"
+        );
+
+        if (Arr::get($this->config, 'persist_way') == 'sync') {
+            dispatch_sync($job);
+        } else {
+            dispatch($job);
+        }
+    }
+
+    protected function serialize($value)
+    {
+        return is_numeric($value) && !in_array($value, [INF, -INF]) && !is_nan($value) ? $value : serialize($value);
+    }
 }
