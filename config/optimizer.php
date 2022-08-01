@@ -36,7 +36,7 @@ return [
         'password',
     ],
 
-    //  额外日志参数
+    //  额外日志参数（公共额外参数请注意防止和业务请求参数同key导致的问题，如user_id字段比较常用，记录访问用户id，可用【additional_request_login_user_id】来替代）
     'additional_request_params' => [
         //  示例：日志增加记录访问用户id
 //        'user_id' => function () {

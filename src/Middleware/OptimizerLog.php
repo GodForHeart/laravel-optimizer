@@ -85,9 +85,9 @@ class OptimizerLog
             if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
                 foreach ($additionalRequestParams as $key => $value) {
                     if ($value instanceof Closure) {
-                        $log[$key] = call_user_func($value);
+                        $log['request_params'][$key] = call_user_func($value);
                     } else {
-                        $log[$key] = $value;
+                        $log['request_params'][$key] = $value;
                     }
                 }
             }
