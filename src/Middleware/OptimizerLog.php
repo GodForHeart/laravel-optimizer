@@ -73,6 +73,8 @@ class OptimizerLog
 
             $log = [
                 'api_uri' => $request->path(),
+                'route_uri' => $request->route()->uri(),
+                'route_parameters' => $request->route()->parameters(),
                 'request_method' => $request->method(),
                 'time' => $endTime - $apiStartTime,
                 'business_time' => $endTime - $businessStartTime,
