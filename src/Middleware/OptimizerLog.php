@@ -72,8 +72,7 @@ class OptimizerLog
             $endTime = microtime(true);
 
             $log = [
-                'api_uri' => $request->path(),
-                'route_uri' => $request->route()->uri(),
+                'api_uri' => $request->route()->uri(),
                 'route_parameters' => $request->route()->parameters(),
                 'request_method' => $request->method(),
                 'time' => $endTime - $apiStartTime,
