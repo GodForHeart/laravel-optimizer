@@ -154,6 +154,13 @@ class OptimizerLimiter
 
     public function persistSingleRedisCommand(array $singleSql)
     {
+        //  修复监听redis事件本身队列事件
+        if (Arr::get($singleSql, 'command', '') == 'eval') {
+            if (current(explode(':', Arr::get($singleSql, 'parameters.1.0', ''))) == 'queues') {
+                return;
+            }
+        }
+
         [$time, $command, $parameters, $connectionName] = [
             Arr::get($singleSql, 'time', 0),
             Arr::get($singleSql, 'command', ''),
