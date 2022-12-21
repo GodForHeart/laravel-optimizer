@@ -6,6 +6,7 @@ use Godforheart\LaravelOptimizer\Contracts\Rule;
 use Godforheart\LaravelOptimizer\Contracts\Storage;
 use Godforheart\LaravelOptimizer\Contracts\Strategy;
 use Godforheart\LaravelOptimizer\Jobs\OptimizerPersistJob;
+use Godforheart\LaravelOptimizer\Kernel\Storage\Logger;
 use Godforheart\LaravelOptimizer\Kernel\Storage\Platform;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
@@ -114,6 +115,11 @@ class OptimizerLimiter
 
     public function persistSingleSql(array $singleSql)
     {
+        //  非日志存在跳过
+        if (!($this->storage instanceof Logger)) {
+            return;
+        }
+
         [$sql, $bindings, $connection, $time] = [
             Arr::get($singleSql, 'sql', ''),
             Arr::get($singleSql, 'bindings', []),
@@ -154,6 +160,11 @@ class OptimizerLimiter
 
     public function persistSingleRedisCommand(array $singleSql)
     {
+        //  非日志存在跳过
+        if (!($this->storage instanceof Logger)) {
+            return;
+        }
+
         //  修复监听redis事件本身队列事件
         if (Arr::get($singleSql, 'command', '') == 'eval') {
             if (current(explode(':', Arr::get($singleSql, 'parameters.1.0', ''))) == 'queues') {
