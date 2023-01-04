@@ -41,7 +41,14 @@ class OptimizerPersistJob implements ShouldQueue
      */
     public function handle()
     {
-        $this->storage->{$this->method}($this->persistArgs);
+        try {
+            $this->storage->{$this->method}($this->persistArgs);
+        } catch (\Throwable $throwable) {
+            app('log')->error('OptimizerPersistJob:', [
+                'exception' => get_class($throwable),
+                'message' => $throwable->getMessage(),
+            ]);
+        }
     }
 
 }
