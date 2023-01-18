@@ -58,7 +58,14 @@ class OptimizerLimiter
         if (!Arr::get($this->config, 'enable')) {
             return false;
         }
-        if (in_array($request->getRequestUri(), (array)Arr::get($this->config, 'ignore_uri'))) {
+
+        if ($request->route()) {
+            $requestUri = $request->route()->uri();
+        } else {
+            $requestUri = Str::replaceFirst('/', '', Str::before($request->getRequestUri(), '?'));
+        }
+
+        if (in_array($requestUri, (array)Arr::get($this->config, 'ignore_uri'))) {
             return false;
         }
 
