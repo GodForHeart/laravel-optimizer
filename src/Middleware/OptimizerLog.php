@@ -83,8 +83,8 @@ class OptimizerLog
                 'business_time' => $endTime - $businessStartTime,
                 'request_params' => $requestParams,
                 'response_content' => $responseContent,
-                "logs" => $this->logs,
-                "redis_logs" => $this->redisLogs,
+                "logs" => array_values($this->logs),
+                "redis_logs" => array_values($this->redisLogs),
             ];
 
             if ($additionalRequestParams = (array)config()->get('optimizer.additional_request_params')) {
