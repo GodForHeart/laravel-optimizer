@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Illuminate\Database\Events\QueryExecuted;
 
 class OptimizerLimiter
 {
@@ -120,7 +121,7 @@ class OptimizerLimiter
         return (bool)Arr::get($this->config, 'safe_mode');
     }
 
-    public function persistSingleSql(array $singleSql)
+    public function persistSingleSql(array $singleSql, QueryExecuted $query)
     {
         //  非日志存在跳过
         if (!($this->storage instanceof Logger)) {
@@ -135,21 +136,20 @@ class OptimizerLimiter
         ];
 
         $tmp = $sql;
-        $tmp = str_replace('%', '%%', $tmp);
-        $tmp = str_replace('?', '%s', $tmp);
-        $tmp = vsprintf(
-            $tmp,
-            collect($bindings)->map(function ($item) {
-                if (is_string($item)) {
-                    return '"' . $item . '"';
-                } elseif (is_bool($item)) {
-                    return (int)$item;
-                } elseif ($item instanceof \DateTime) {
-                    return $item->format('Y-m-d H:i:s');
-                }
-                return $item;
-            })->toArray()
-        );
+
+        foreach ($bindings as $key => $binding) {
+            $regex = is_numeric($key)
+                ? "/\?(?=(?:[^'\\\']*'[^'\\\']*')*[^'\\\']*$)/"
+                : "/:{$key}(?=(?:[^'\\\']*'[^'\\\']*')*[^'\\\']*$)/";
+
+            if ($binding === null) {
+                $binding = 'null';
+            } elseif (!is_int($binding) && !is_float($binding)) {
+                $binding = $this->quoteStringBinding($query, $binding);
+            }
+
+            $tmp = preg_replace($regex, $binding, $tmp, 1);
+        }
         $tmp = str_replace("\\", "", $tmp);
 
         $job = new OptimizerPersistJob(
@@ -213,5 +213,29 @@ class OptimizerLimiter
     protected function serialize($value)
     {
         return is_numeric($value) && !in_array($value, [INF, -INF]) && !is_nan($value) ? $value : serialize($value);
+    }
+
+    protected function quoteStringBinding(QueryExecuted $query, $binding)
+    {
+        try {
+            $pdo = $query->connection->getPdo();
+
+            if ($pdo instanceof \PDO) {
+                return $pdo->quote($binding);
+            }
+        } catch (\PDOException $e) {
+            throw_if('IM001' !== $e->getCode(), $e);
+        }
+
+        // Fallback when PDO::quote function is missing...
+        $binding = \strtr($binding, [
+            chr(26) => '\\Z',
+            chr(8) => '\\b',
+            '"' => '\"',
+            "'" => "\'",
+            '\\' => '\\\\',
+        ]);
+
+        return "'".$binding."'";
     }
 }

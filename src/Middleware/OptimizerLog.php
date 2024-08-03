@@ -110,7 +110,7 @@ class OptimizerLog
         DB::listen(function (QueryExecuted $query) {
             $newLog = [
                 "sql" => $query->sql,
-                "bindings" => $query->bindings,
+                "bindings" => $query->connection->prepareBindings($query->bindings),
                 "time" => $query->time / 1000,
                 "connection" => $query->connectionName,
             ];
@@ -122,7 +122,7 @@ class OptimizerLog
 
             $this->logs[] = $newLog;
 
-            $this->optimizerLimiter->persistSingleSql($newLog);
+            $this->optimizerLimiter->persistSingleSql($newLog, $query);
         });
     }
 
