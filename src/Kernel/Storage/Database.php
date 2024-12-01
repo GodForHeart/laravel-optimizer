@@ -10,6 +10,9 @@ class Database extends StorageAbstract implements Storage
     public function persist(array $log)
     {
         $responseContent = $log['response_content'] ?? [];
+        if (is_string($responseContent) && !$this->isJson($responseContent)){
+            $responseContent = [$responseContent];
+        }
 
         DB::connection($this->config['channels'])->table($this->config['table'])
             ->insert([
@@ -27,5 +30,16 @@ class Database extends StorageAbstract implements Storage
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+    }
+    public function isJson($value): bool
+    {
+
+        if (! is_string($value)) {
+            return false;
+        }
+
+        json_decode($value);
+
+        return json_last_error() == JSON_ERROR_NONE;
     }
 }

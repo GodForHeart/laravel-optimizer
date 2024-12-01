@@ -36,6 +36,11 @@ class OptimizerLog
      */
     public function handle(Request $request, Closure $next)
     {
+        //  预检请求跳过
+        if ($request->getMethod() == Request::METHOD_OPTIONS) {
+            return $next($request);
+        }
+
         $this->logs = [];
         $this->redisLogs = [];
         if (!$this->optimizerLimiter->allowStorage($request)) {
