@@ -22,6 +22,7 @@ class OptimizerLog
     private $optimizerLimiter;
     private $logs;
     private $redisLogs;
+    private static $isLoaded = false;
 
     public function __construct(OptimizerLimiter $optimizerLimiter)
     {
@@ -59,8 +60,11 @@ class OptimizerLog
             Arr::set($requestParams, $removeKey, 'This is a file');
         }, array_keys(Arr::dot($request->allFiles())));
 
-        $this->listenSql();
-        $this->listenRedis();
+        if (!self::$isLoaded) {
+            $this->listenSql();
+            $this->listenRedis();
+            self::$isLoaded = true;
+        }
 
         $response = $next($request);
 
